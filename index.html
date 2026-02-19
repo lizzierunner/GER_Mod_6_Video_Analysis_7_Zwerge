@@ -159,10 +159,79 @@
             min-width: 44px;
           }
         }
+
+        /* Music Toggle Button */
+        #music-toggle {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 10000;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          border: 2px solid rgba(217, 159, 74, 0.5);
+          background: rgba(42, 36, 30, 0.85);
+          backdrop-filter: blur(8px);
+          color: #d4a855;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        #music-toggle:hover {
+          background: rgba(60, 50, 38, 0.95);
+          border-color: rgba(217, 159, 74, 0.8);
+          transform: scale(1.1);
+          box-shadow: 0 4px 20px rgba(217, 159, 74, 0.3);
+        }
+        #music-toggle:active {
+          transform: scale(0.95);
+        }
+        #music-toggle .bar {
+          display: inline-block;
+          width: 3px;
+          margin: 0 1.5px;
+          border-radius: 2px;
+          background: currentColor;
+          transition: height 0.2s ease;
+        }
+        #music-toggle.playing .bar {
+          animation: music-bars 0.8s ease-in-out infinite alternate;
+        }
+        #music-toggle.playing .bar:nth-child(1) { animation-delay: 0s; }
+        #music-toggle.playing .bar:nth-child(2) { animation-delay: 0.15s; }
+        #music-toggle.playing .bar:nth-child(3) { animation-delay: 0.3s; }
+        #music-toggle.playing .bar:nth-child(4) { animation-delay: 0.1s; }
+        #music-toggle:not(.playing) .bar {
+          height: 4px !important;
+        }
+        #music-toggle .bar:nth-child(1) { height: 6px; }
+        #music-toggle .bar:nth-child(2) { height: 12px; }
+        #music-toggle .bar:nth-child(3) { height: 8px; }
+        #music-toggle .bar:nth-child(4) { height: 14px; }
+        @keyframes music-bars {
+          0%   { height: 4px; }
+          100% { height: 18px; }
+        }
     </style>
 </head>
 <body class="bg-stone-900 text-white overflow-hidden">
     <div id="root"></div>
+
+    <!-- Background Music -->
+    <audio id="bg-music" loop preload="auto">
+      <source src="luis_humanoide-middle-earth-fantasy-music-inspired-by-lord-of-the-rings-261464.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Music Toggle Button -->
+    <button id="music-toggle" aria-label="Toggle music" title="Toggle music">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
 
     <!-- 7. Application Logic -->
     <script>
@@ -790,6 +859,55 @@
 
         // Initialize sparkle trail
         createSparkleTrail();
+    </script>
+
+    <!-- 9. Background Music Controller -->
+    <script>
+        (function() {
+            const music = document.getElementById('bg-music');
+            const toggle = document.getElementById('music-toggle');
+            
+            music.volume = 0.3; // Start at 30% volume
+
+            function fadeIn(audio, duration) {
+                audio.volume = 0;
+                audio.play().catch(() => {});
+                const step = 0.3 / (duration / 50);
+                const fade = setInterval(() => {
+                    if (audio.volume + step >= 0.3) {
+                        audio.volume = 0.3;
+                        clearInterval(fade);
+                    } else {
+                        audio.volume += step;
+                    }
+                }, 50);
+            }
+
+            function fadeOut(audio, duration) {
+                const step = audio.volume / (duration / 50);
+                const fade = setInterval(() => {
+                    if (audio.volume - step <= 0) {
+                        audio.volume = 0;
+                        audio.pause();
+                        clearInterval(fade);
+                    } else {
+                        audio.volume -= step;
+                    }
+                }, 50);
+            }
+
+            toggle.addEventListener('click', () => {
+                if (music.paused) {
+                    fadeIn(music, 800);
+                    toggle.classList.add('playing');
+                    toggle.title = 'Pause music';
+                } else {
+                    fadeOut(music, 600);
+                    toggle.classList.remove('playing');
+                    toggle.title = 'Play music';
+                }
+            });
+        })();
     </script>
 </body>
 </html>
