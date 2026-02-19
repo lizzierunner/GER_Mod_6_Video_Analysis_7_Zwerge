@@ -232,6 +232,52 @@
         // --- DOM ELEMENTS ---
         const root = document.getElementById('root');
 
+        // --- SOUND EFFECTS SYSTEM ---
+        const soundEffects = {
+          dwarfHover: 'https://example.com/sounds/wooden-pop.mp3', // Soft wooden pop sound
+          gemstoneClick: 'https://example.com/sounds/magical-chime.mp3', // Magical chime sound
+          confettiExplosion: 'https://example.com/sounds/tada-fanfare.mp3' // Ta-da fanfare sound
+        };
+
+        // Audio cache to prevent reloading
+        const audioCache = {};
+
+        function playSound(type) {
+          const soundUrl = soundEffects[type];
+          
+          if (!soundUrl) {
+            console.warn(`Sound type "${type}" not found`);
+            return;
+          }
+
+          // Check if audio is already cached
+          if (!audioCache[type]) {
+            audioCache[type] = new Audio(soundUrl);
+            audioCache[type].volume = 0.5; // Set default volume to 50%
+          }
+
+          // Clone the audio to allow overlapping sounds
+          const sound = audioCache[type].cloneNode();
+          
+          // Play the sound
+          sound.play().catch(err => {
+            console.warn(`Could not play sound "${type}":`, err.message);
+          });
+        }
+
+        // Add sound to dwarf hover events (will be applied when rendering)
+        function attachDwarfSounds() {
+          // Wait a bit for DOM to be ready
+          setTimeout(() => {
+            const dwarfElements = document.querySelectorAll('[data-dwarf-avatar]');
+            dwarfElements.forEach(dwarf => {
+              dwarf.addEventListener('mouseenter', () => {
+                playSound('dwarfHover');
+              });
+            });
+          }, 100);
+        }
+
         // --- RENDER FUNCTIONS ---
         function initApp() {
           if (!root) return;
@@ -621,52 +667,6 @@
 
         // Initialize 3D tilt effect
         init3DTiltEffect();
-
-        // --- SOUND EFFECTS SYSTEM ---
-        const soundEffects = {
-          dwarfHover: 'https://example.com/sounds/wooden-pop.mp3', // Soft wooden pop sound
-          gemstoneClick: 'https://example.com/sounds/magical-chime.mp3', // Magical chime sound
-          confettiExplosion: 'https://example.com/sounds/tada-fanfare.mp3' // Ta-da fanfare sound
-        };
-
-        // Audio cache to prevent reloading
-        const audioCache = {};
-
-        function playSound(type) {
-          const soundUrl = soundEffects[type];
-          
-          if (!soundUrl) {
-            console.warn(`Sound type "${type}" not found`);
-            return;
-          }
-
-          // Check if audio is already cached
-          if (!audioCache[type]) {
-            audioCache[type] = new Audio(soundUrl);
-            audioCache[type].volume = 0.5; // Set default volume to 50%
-          }
-
-          // Clone the audio to allow overlapping sounds
-          const sound = audioCache[type].cloneNode();
-          
-          // Play the sound
-          sound.play().catch(err => {
-            console.warn(`Could not play sound "${type}":`, err.message);
-          });
-        }
-
-        // Add sound to dwarf hover events (will be applied when rendering)
-        function attachDwarfSounds() {
-          // Wait a bit for DOM to be ready
-          setTimeout(() => {
-            const dwarfElements = document.querySelectorAll('[data-dwarf-avatar]');
-            dwarfElements.forEach(dwarf => {
-              dwarf.addEventListener('mouseenter', () => {
-                playSound('dwarfHover');
-              });
-            });
-          }, 100);
-        }
     </script>
 
     <!-- 8. Sparkling Mouse Trail Effect -->
